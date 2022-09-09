@@ -3,6 +3,7 @@ package com.example.pain_t;
 
 //imported classes
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -14,10 +15,10 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.embed.swing.SwingFXUtils;
 
 import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageOutputStream;
-import java.awt.image.RenderedImage;
+
 import java.io.*;
 
 public class Pain_tApplication extends Application
@@ -41,13 +42,16 @@ public class Pain_tApplication extends Application
         MenuItem openImg = new MenuItem("Open Image");  //sub menus to add to File
         MenuItem save = new MenuItem("Save");
         MenuItem saveAs = new MenuItem("Save As");
+        MenuItem close = new MenuItem("Close Program");
 
         File.getItems().add(openImg);       //adding to File
         File.getItems().add(save);
         File.getItems().add(saveAs);
+        File.getItems().add(close);
 
         openImg.setOnAction(openImageEventListener);    //calling event handler to open image
         saveAs.setOnAction(saveAsEventListener);        //calling event handler to save image to new file
+        close.setOnAction(closeEventListener);        //calling event handler to close program
 
         myImageView = new ImageView();                  //new image view object
         VBox root = new VBox();                            //vbox to put image and menubar into
@@ -85,22 +89,37 @@ public class Pain_tApplication extends Application
         }
     };
 
-    EventHandler<ActionEvent> saveAsEventListener       //calling open image handle function-does not work
+    EventHandler<ActionEvent> saveAsEventListener       //calling open saveAs handle function
             = new EventHandler<ActionEvent>()
     {
         @Override
         public void handle(ActionEvent t)//does not work
         {
-            File saveFile = new File("~ethan/Desktop/saved_image.png");
-            try
-            {
-                //BufferedImage bi = myImageView;
-                File outputfile = new File("~/ethan/Desktop/saved_image.png");
-                ImageIO.write((RenderedImage) myImageView, "png", (ImageOutputStream) outputfile);
+            FileChooser fileExplorer = new FileChooser();       //creating new file explorer object
+            fileExplorer.setTitle("Save Image");
+
+            File file = fileExplorer.showSaveDialog(null);      //making fieExplore object a save file window
+            if (file != null) {
+                try {
+                    ImageIO.write(SwingFXUtils.fromFXImage(myImageView.getImage(),      //writing image as png
+                            null), "png", file);
+                } catch (IOException ex) {
+                    System.out.println("can not be saved");
+                }
             }
-            catch(IOException e)
-            {
-                System.out.println("could not save");
+        }
+    };
+
+    EventHandler<ActionEvent> closeEventListener       //calling close application handle function
+            = new EventHandler<ActionEvent>()
+    {
+        @Override
+        public void handle(ActionEvent t)
+        {
+            try {
+                System.exit(0);     //closing program
+            } catch (Exception e) {
+                System.out.println("This program is unstoppable");      //program has become sentient and will not let you close it
             }
         }
     };
